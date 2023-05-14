@@ -1,20 +1,7 @@
-#include <signal.h>
 #include <string>
 #include "ros/ros.h"
 #include "client/message.h"
 #include "server/service.h"
-
-void MySigintHandler(int sig)
-{
-    ROS_INFO("shutting down!");
-    ros::NodeHandle nh;
-    ros::ServiceClient client = nh.serviceClient<server::service>("service");
-    server::service srv2;
-    srv2.request.name = ros::this_node::getName();
-    srv2.request.status = 0;
-    client.call(srv2);
-    ros::shutdown();
-}
 
 int main(int argc, char **argv){
     ROS_INFO("input your client's name");
@@ -24,7 +11,6 @@ int main(int argc, char **argv){
     ros::NodeHandle n;
     ros::ServiceClient client_set = n.serviceClient<server::service>("service");
     ros::Rate loop_rate(1);
-    signal(SIGINT, MySigintHandler);
     server::service srv1;
     srv1.request.name = name;
     srv1.request.status = 1;
@@ -39,5 +25,13 @@ int main(int argc, char **argv){
         ros::spinOnce();
         loop_rate.sleep();
     }
+    ROS_INFO("shutting down!");
+    ros::NodeHandle nh;
+    ros::ServiceClient client = nh.serviceClient<server::service>("service");
+    server::service srv2;
+    srv2.request.name = ros::this_node::getName();
+    srv2.request.status = 0;
+    client.call(srv2);
+    ros::shutdown();
     return 0;
 }
